@@ -10,11 +10,13 @@ module.exports = function(sequelize, DataTypes) {
     },
     name: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: false,
+      unique: true
     },
     fullname: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: false,
+      unique: true
     },
     created_at: {
       type: DataTypes.DATE,
@@ -23,31 +25,33 @@ module.exports = function(sequelize, DataTypes) {
     },
     creator: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: true
     },
     algorithm: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: true
     },
     prooftype: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: true
     },
     image: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: true,
+      unique: true
     },
     website: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: true,
+      unique: true
     },
     wikipedia: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: true
     },
     story: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: true
     }
   }, {
     tableName: 'coin',
@@ -56,7 +60,12 @@ module.exports = function(sequelize, DataTypes) {
   });
 
   coin.associate = models => {
-    coin.hasMany(models.coin_data);
+    coin.hasMany(models.coin_data, {
+      foreignKey: "coin_id"
+    });
+    coin.hasMany(models.news, {
+      foreignKey: "coin_id"
+    });
   }
   return coin;
 };

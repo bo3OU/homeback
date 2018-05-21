@@ -44,6 +44,5 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     tableName: 'coin_data',
     timestamps: false,
-    underscored : true,
   });
 };

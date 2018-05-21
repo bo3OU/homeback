@@ -9,46 +9,125 @@ const models = require('./models');
 // data/:coin/week
 // data/:coin/year
 // data/:coin/all
+// data/:coin/news
 
+router.get('/data/:coin/news', function(req, res) {
+    console.log("Get /news " + req.params.coin);
+    // TODO : remove coin attributes, let only news' 
+    models.coin.findAll({
+        where: {name: req.params.coin},
+        include:[{model: models.news}]
+    })
+    .then(news => res.send(news))
+})
+
+
+router.get('/data/:coin/today', function(req, res) {
+    var date = new Date(Date.now());
+    date.setDate(date.getDate() - 1);
+    console.log(date.getTime());
+    // TODO : test
+    models.coin.findAll({
+        where: { name: req.params.coin },
+        include:[{
+                    model: models.coin_data,
+                    where: {
+                        [Op.gt]: date.getTime()
+                    }
+                }]
+    })
+    .then(data => res.json(data))
+})
+
+router.get('/data/:coin/month', function(req, res) {
+    var date = new Date(Date.now());
+    date.setMonth(date.getMonth() - 1);
+    console.log(date.getTime());
+    models.coin.findAll({
+        where: { name: req.params.coin },
+        include:[{
+                    model: models.coin_data,
+                    where: {
+                        [Op.gt]: date.getTime()
+                    }
+                }]
+    })
+    .then(data => res.json(data))
+})
+
+router.get('/data/:coin/year', function(req, res) {
+    var date = new Date(Date.now());
+    date.setFullYear(date.getFullYear() - 1);
+    console.log(date.getTime());
+    models.coin.findAll({
+        where: { name: req.params.coin },
+        include:[{
+                    model: models.coin_data,
+                    where: {
+                        timestamp:{
+                            [Op.gt]: date.getTime()
+                        }
+                    }
+                }]
+    })
+    .then(data => res.json(data))
+})
 
 router.get('/coins', function(req, res) {
-    console.log("/coins");
+    console.log("Get /coins");
+    //TODO : remove?
     models.coin.findAll().then((coins) => {
         res.json(coins);
     })
 })
 
 router.put('/user', function(req, res) {
-    models.user.create(req.params.user);    
+    // TODO: authentification
+    console.log("Put /user");
+    user
+    .build({
+        login: req.params.login,
+        password: req.params.password,
+        email: req.params.email
+    })
+    .save()
+    .then(res.send(200))
+    .catch(error => {
+        console.log(error)
+        res.send(400)
+    })
 })
 
 router.delete('/user/:user', function (req, res) {
+    console.log("delete /user/:user");
     models.user.destroy
 })
-router.get('/user', function(req, res) {
-
-    models.coin.findAll().then(function(coin){
-        console.log(coin)
-    })
-    res.send("salam");
-})
-
 
 router.get('/coin/:coin', function(req, res) {
-
-    models.coin.findAll().then(function(coin){
-        console.log(coin)
+    console.log("Get /coin/:coin");
+    //add attributes 
+    models.coin.max('timestamp',{
+        where: { name: req.params.coin },
+        include: [{
+                model: coin_data
+            }]
     })
-    res.send("salam");
+    .then(data => res.json(data))
 })
-
 
 router.get('/top', function(req, res) {
-
-    models.coin.findAll().then(function(coin){
-        console.log(coin)
+    console.log("Get /top");
+    models.coin.findAll({
+        include: [{ model: coin_data}],
+        //add attributes
+        attributes: [],
+        limit : 100
+    }).then((coins) => {
+        res.status(200).json(coins);
+    }).catch((error) => {
+        res.status(500).send('Internal server error');
     })
-    res.send("salam");
 })
+
 
 module.exports = router;
