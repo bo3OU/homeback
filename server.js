@@ -9,7 +9,7 @@ app.get('/', (req, res) => {
     models.coin.findAll().then(function(coin){
         console.log(coin)
     })
-    res.send("salam");
+    res.send("RIP ancalogon");
 
 });
 
@@ -19,7 +19,7 @@ app.get('/user', (req, res) => {
     models.user.findAll().then(function(coin){
         console.log(coin)
     })
-    res.send("haha");
+    res.send("aerendil is da best");
 
 });
 

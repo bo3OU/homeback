@@ -61,11 +61,20 @@ module.exports = function(sequelize, DataTypes) {
 
   coin.associate = models => {
     coin.hasMany(models.coin_data, {
-      foreignKey: "coin_id"
+      foreignKey: "coin_id",
+      targetKey: "coin_id"
     });
     coin.hasMany(models.news, {
       foreignKey: "coin_id"
     });
+    coin.belongsToMany(models.user,{
+      through: {
+        model: models.favorites,
+        unique: false
+      }
+    });
+    
   }
+
   return coin;
 };

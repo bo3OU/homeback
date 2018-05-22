@@ -43,9 +43,14 @@ module.exports = function(sequelize, DataTypes) {
     }
   });
 
-
   user.associate = models => {
-    user.hasMany(models.coin_data);
+    user.belongsToMany(models.coin,{
+      through: {
+        model: models.favorites,
+        unique: false
+      }
+    });
   }
+
   return user;
 };
