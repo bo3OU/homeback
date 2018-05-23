@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 const models = require('./models');
 const request = require('request');
-
+const sequelize = require('sequelize');
 // /coin/:coin/news
 // /data/:coin/price
 // /search/:string
