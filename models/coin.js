@@ -52,6 +52,38 @@ module.exports = function(sequelize, DataTypes) {
     story: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    price: {
+      type: DataTypes.BIGINT,
+      allowNull: false
+    },
+    volume: {
+      type: DataTypes.BIGINT,
+      allowNull: false
+    },
+    open: {
+      type: DataTypes.BIGINT,
+      allowNull: false
+    },
+    close: {
+      type: DataTypes.BIGINT,
+      allowNull: false
+    },
+    high: {
+      type: DataTypes.BIGINT,
+      allowNull: false
+    },
+    low: {
+      type: DataTypes.BIGINT,
+      allowNull: false
+    },
+    cc_id: {
+      type: DataTypes.INTEGER(11),
+      allowNull: false
+    },
+    marketcap: {
+      type: DataTypes.BIGINT,
+      allowNull: false
     }
   }, {
     tableName: 'coin',
@@ -60,10 +92,6 @@ module.exports = function(sequelize, DataTypes) {
   });
 
   coin.associate = models => {
-    coin.hasMany(models.coin_data, {
-      foreignKey: "coin_id",
-      targetKey: "coin_id"
-    });
     coin.hasMany(models.news, {
       foreignKey: "coin_id"
     });

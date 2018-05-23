@@ -2,7 +2,7 @@
   "development": {
     "username": "ali",
     "password": "alibagho2153",
-    "database": "new",
+    "database": "final",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
