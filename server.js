@@ -5,17 +5,11 @@ var routes = require('./routes');
 
 
 app.get('/', (req, res) => {
-
-    models.coin.findAll().then(function(coin){
-        console.log(coin)
-    })
     res.send("RIP ancalogon");
-
 });
 
 
 app.get('/user', (req, res) => {
-
     models.user.findAll().then(function(coin){
         console.log(coin)
     })

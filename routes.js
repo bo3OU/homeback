@@ -3,25 +3,16 @@ var router = express.Router();
 const models = require('./models');
 const request = require('request');
 const sequelize = require('sequelize');
+const op = sequelize.Op;
+
+
 // /coin/:coin/news
 // /data/:coin/price
 // /search/:string
-// /data/:coin/price
 // /coin/data
 // /favs/:user
 
 
-router.get('/coin/:coin/news', function(req, res) {
-    //get the news of a coin
-    models.coin.findAll({
-        where: {name: req.params.coin},
-        attributes: [],
-        include:[{model: models.news}]
-    }).then(news => res.json(news))
-    .catch(error => {
-        res.status(500).json("Internal server error");
-    })
-})
 
 
 router.get('/data/:coin/price', function(req, res) {
@@ -39,18 +30,19 @@ router.get('/data/:coin/price', function(req, res) {
 
 
  // IS NOT WORKING
-router.get('/search/:string', function(req, res) {
+router.get('/search/:name', function(req, res) {
     models.coin.findAll({
         attributes:['fullname', 'name', 'image'],
-        where : {
-            [Op.or]: {
-                name: {
-                    [Op.like]: "%" + req.params.coin + "%"
-                },
-                fullname: {
-                    [Op.like]: "%" + req.params.coin + "%"
-                },
+        where : 
+        {
+            [op.or] : {
+            fullname: {
+                [op.like]: "%" + req.params.name + "%"
+            },
+            name: {
+                [op.like]: "%" + req.params.name + "%"
             }
+        }
         }
     })
     .then(data => res.json(data))
@@ -69,6 +61,19 @@ router.get('/coin/data', function(req, res) {
         res.status(200).json(coins);
     }).catch((error) => {
         res.status(500).send('Internal server error');
+    })
+})
+
+
+router.get('/coin/:coin/news', function(req, res) {
+    //get the news of a coin
+    models.coin.findAll({
+        where: {name: req.params.coin},
+        attributes: [],
+        include:[{model: models.news}]
+    }).then(news => res.json(news))
+    .catch(error => {
+        res.status(500).json("Internal server error");
     })
 })
 
@@ -91,26 +96,26 @@ router.get('/favs/:user', function(req, res) {
     })
 })
 
-router.put('/user', function(req, res) {
-    // TODO: authentification
-    console.log("Put /user");
-    models.user
-    .build({
-        login: req.params.login,
-        password: req.params.password,
-        email: req.params.email
-    })
-    .save()
-    .then(res.send(200))
-    .catch(error => {
-        console.log(error)
-        res.send(400)
-    })
-})
+// router.put('/user', function(req, res) {
+//     // TODO: authentification
+//     console.log("Put /user");
+//     models.user
+//     .build({
+//         login: req.params.login,
+//         password: req.params.password,
+//         email: req.params.email
+//     })
+//     .save()
+//     .then(res.send(200))
+//     .catch(error => {
+//         console.log(error)
+//         res.send(400)
+//     })
+// })
 
-router.delete('/user/:user', function (req, res) {
-    console.log("delete /user/:user");
-    models.user.destroy
-})
+// router.delete('/user/:user', function (req, res) {
+//     console.log("delete /user/:user");
+//     models.user.destroy
+// })
 
 module.exports = router;
