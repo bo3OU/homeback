@@ -4,7 +4,7 @@ const models = require('./models');
 const request = require('request');
 const sequelize = require('sequelize');
 const op = sequelize.Op;
-
+const jwt = require('jsonwebtoken');
 // GET      /hist/:coin/:time/ (time : day, week, month, year, all)
 // GET      /coin/:coin/news
 // GET      /data/:coin/price
@@ -15,11 +15,19 @@ const op = sequelize.Op;
 // POST      /fav/:coin/user/:user
 // POST     /user
 
+function AuthMiddleware(req, res, next) {
+  const bearerHeader = req.headers['authorization'];
+  if(typeof bearerHeader !== 'undefined') {
+    const bearer = bearerHeader.split(' ');
+    const bearerToken = bearer[1];
+    req.token = bearerToken;
+    next();
+  } else {
+    res.sendStatus(403);
+  }
+}
 
 router.get('/hist/:coin/:time/', function(req, res) {
-    console.log(req.params.time);
-    console.log(req.params.coin);
-    
     if(req.params.time == "day")
     {
         request('https://min-api.cryptocompare.com/data/histominute?fsym='+ req.params.coin +'&tsym=USD&limit=48&aggregate=30',{json: true}, (err, response, body) => {
@@ -59,9 +67,7 @@ router.get('/hist/:coin/:time/', function(req, res) {
         res.status(404).json("not found")
 })
 
-router.post('/coin/:coin', (req, res) => {
 
-})
 
 router.get('/data/:coin/price', function(req, res) {
     console.log(req.query)
@@ -146,32 +152,44 @@ router.get('/favs/:user', function(req, res) {
     })
 })
 
-router.post('/fav/:coin/user/:user', function(req, res) {
+router.post('/fav/:coin', AuthMiddleware, function(req, res) {
     //add to favorites
-    var result = null;
-    models.favorites.build({
-        coin_id: req.params.coin,
-        user_id: req.params.user  
+    jwt.verify(req.token, 'secretkey', (err, authData) => {
+        if(err) {
+            res.sendStatus(403);
+        } else {
+            var result = null;
+            models.favorites.build({
+                coin_id: req.params.coin,
+                user_id: authData.user.id  
+            })
+            .save()
+            .then(() => { res.json({created: true}) })
+            .catch((err) => { res.status(500).json("Internal server error") })
+        }
     })
-    .save()
-    .then(() => { res.json({created: true}) })
-    .catch((err) => { res.status(500).json("Internal server error") })
+
 })
 
 
-router.delete('/fav/:coin/user/:user', function(req, res) {
-    //add to favorites
-    var result = null;
-    models.favorites.destroy({
-        where: {
-            [op.and] : {
-                coin_id: req.params.coin,
-                user_id: req.params.user
-            }
+router.delete('/fav/:coin', AuthMiddleware, function(req, res) {
+    
+    jwt.verify(req.token, 'secretkey', (err, authData) => {
+        if(err) {
+            res.sendStatus(403);
+        } else {
+//            res.json("hello :D");
+            models.favorites.destroy({
+                where: {
+                    [op.and] : { coin_id: req.params.coin, user_id: authData.user.id }
+                }
+            })
+            .then(() => res.json({destroyed: true}))
+            .catch(err=> res.status(500).json("Internal server error : "))
         }
     })
-    .then(() => res.json({destroyed: true}))
-    .catch(err=> res.status(500).json("Internal server error : "))
+    
+
 })
 
 router.post('/user', function(req, res) {
@@ -199,10 +217,6 @@ router.post('/user', function(req, res) {
     })
     .catch((err) => res.status(500).json("Internal server error"))
 })
-
-
-
-
 
 
 module.exports = router;
