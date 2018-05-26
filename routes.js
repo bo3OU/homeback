@@ -5,14 +5,15 @@ const request = require('request');
 const sequelize = require('sequelize');
 const op = sequelize.Op;
 
-// GET      /hist/:coin/:time/
+// GET      /hist/:coin/:time/ (time : day, week, month, year, all)
 // GET      /coin/:coin/news
 // GET      /data/:coin/price
 // GET      /search/:string
 // GET      /coin/data
 // GET      /favs/:user
 // DELETE   /fav/:coin/user/:user
-// PUT      /fav/:coin/user/:user
+// POST      /fav/:coin/user/:user
+// POST     /user
 
 
 router.get('/hist/:coin/:time/', function(req, res) {
@@ -145,7 +146,7 @@ router.get('/favs/:user', function(req, res) {
     })
 })
 
-router.put('/fav/:coin/user/:user', function(req, res) {
+router.post('/fav/:coin/user/:user', function(req, res) {
     //add to favorites
     var result = null;
     models.favorites.build({
@@ -170,53 +171,38 @@ router.delete('/fav/:coin/user/:user', function(req, res) {
         }
     })
     .then(() => res.json({destroyed: true}))
-    .catch(err=> res.status(500).json("Internal server error : " + err))
-    // models.sequelize.query("select 1 from favorites where user_id = " + req.params.user + " and coin_id = "+ req.params.coin, {logging: console.log, raw: true, type: 'SELECT'})
-    // .then(res => {
-    //     result = res;
-    // })
-    // .catch(()=>{
-    //     res.status(500).json("Internal server error");
-    // });
-
-
-    // models.user.findOne({
-    //     where: {
-    //         id: req.params.user
-    //     },
-    //     attributes:[],
-    //     include: [{ model: models.coin,
-    //                 attributes: ['image','price','volume','marketcap','name','fullname'],
-    //                 through: {attributes: []}    
-    //             }],
-    //     order: sequelize.literal('marketcap DESC'),
-    // }).then((coins) => {
-    //     res.status(200).json(coins);
-    // }).catch((error) => {
-    //     res.status(500).send('Internal server error');
-    // })
+    .catch(err=> res.status(500).json("Internal server error : "))
 })
 
-// router.put('/user', function(req, res) {
-//     // TODO: authentification
-//     console.log("Put /user");
-//     models.user
-//     .build({
-//         login: req.params.login,
-//         password: req.params.password,
-//         email: req.params.email
-//     })
-//     .save()
-//     .then(res.send(200))
-//     .catch(error => {
-//         console.log(error)
-//         res.send(400)
-//     })
-// })
+router.post('/user', function(req, res) {
+    // TODO: authentification
+    models.user.findOne({
+        where: {
+            [op.or]: {
+                login: req.body.login,
+                email: req.body.email
+            }
+        }
+    })
+    .then((user)=> {
+        if(user){
+            res.status(400).json("already created")
+        }
+        else {
+            models.user.create({
+                login: req.body.login,
+                email: req.body.email,
+                password: req.body.password
+            }).then(() => res.status(200).json("created"))
+            .catch((err) => res.status(500).json("Internal server error"))
+        }
+    })
+    .catch((err) => res.status(500).json("Internal server error"))
+})
 
-// router.delete('/user/:user', function (req, res) {
-//     console.log("delete /user/:user");
-//     models.user.destroy
-// })
+
+
+
+
 
 module.exports = router;

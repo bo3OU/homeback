@@ -2,7 +2,11 @@ const express = require('express')
 const models = require('./models');
 var app = express()
 var routes = require('./routes');
+const bodyParser = require('body-parser');
 
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
     res.send("RIP ancalogon");
