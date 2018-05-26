@@ -28,37 +28,38 @@ function AuthMiddleware(req, res, next) {
 }
 
 router.get('/hist/:coin/:time/', function(req, res) {
+    const coinName = req.params.coin.toString().toUpperCase();
     if(req.params.time == "day")
     {
-        request('https://min-api.cryptocompare.com/data/histominute?fsym='+ req.params.coin +'&tsym=USD&limit=48&aggregate=30',{json: true}, (err, response, body) => {
+        request('https://min-api.cryptocompare.com/data/histominute?fsym='+ coinName +'&tsym=USD&limit=48&aggregate=30',{json: true}, (err, response, body) => {
             res.json(body.Data);
         })
         //48 value for 1 day *30  = 1440 minute
     }
     else if(req.params.time == "week")
     {
-        request('https://min-api.cryptocompare.com/data/histohour?fsym='+ req.params.coin +'&tsym=USD&limit=84&aggregate=2',{json: true}, (err, response, body) => {
+        request('https://min-api.cryptocompare.com/data/histohour?fsym='+ coinName +'&tsym=USD&limit=84&aggregate=2',{json: true}, (err, response, body) => {
             res.json(body.Data);
         })
         //84 value for 1 week *2  = 168 hours    
 }
     else if(req.params.time == "month")
     {
-        request('https://min-api.cryptocompare.com/data/histohour?fsym='+ req.params.coin +'&tsym=USD&limit=144&aggregate=5',{json: true}, (err, response, body) => {
+        request('https://min-api.cryptocompare.com/data/histohour?fsym='+ coinName +'&tsym=USD&limit=144&aggregate=5',{json: true}, (err, response, body) => {
             res.json(body.Data);
         })
         //144 value for 1 month *5  = 720 hours    
 }
     else if(req.params.time == "year")
     {
-        request('https://min-api.cryptocompare.com/data/histoday?fsym='+ req.params.coin +'&tsym=USD&limit=182&aggregate=2',{json: true}, (err, response, body) => {
+        request('https://min-api.cryptocompare.com/data/histoday?fsym='+ coinName +'&tsym=USD&limit=182&aggregate=2',{json: true}, (err, response, body) => {
             res.json(body.Data);
         })
         //  182 value for 1 year *2  = 365 days    
 }
     else if(req.params.time == "all")
     {
-        request('https://min-api.cryptocompare.com/data/histoday?fsym='+ req.params.coin +'&tsym=USD&aggregate=10',{json: true}, (err, response, body) => {
+        request('https://min-api.cryptocompare.com/data/histoday?fsym='+ coinName +'&tsym=USD&aggregate=10',{json: true}, (err, response, body) => {
             res.json(body.Data);
         })
         //72 value for 1 day * 10  = 2000 VALUE    
@@ -70,16 +71,7 @@ router.get('/hist/:coin/:time/', function(req, res) {
 
 
 router.get('/data/:coin/price', function(req, res) {
-    console.log(req.query)
-    //get it from database doe ...
-
-    // var date = new Date(Date.now());
-    // date.setDate(date.getDate() - 1);
-    // console.log(date.getTime());
-
-    //forward link from cryptocompare
-    //https://min-api.cryptocompare.com/data/histohour?fsym=BTC&tsym=USD&limit=10
-    request('https://min-api.cryptocompare.com/data/histoday?fsym='+ req.params.coin.toString().toUpperCase() +'&tsym=USD&limit=1',{json: true}, (err, response, body) => {
+    request('https://min-api.cryptocompare.com/data/histominute?fsym='+ req.params.coin.toString().toUpperCase() +'&tsym=USD&limit=1',{json: true}, (err, response, body) => {
         res.json(body.Data[0]);
     })
 })
@@ -133,22 +125,28 @@ router.get('/coin/:coin/news', function(req, res) {
     })
 })
 
-router.get('/favs/:user', function(req, res) {
-    //get favorites
-    models.user.findAll({
-        where: {
-            id: req.params.user
-        },
-        attributes:[],
-        include: [{ model: models.coin,
-                    attributes: ['image','price','volume','marketcap','name','fullname'],
-                    through: {attributes: []}    
-                }],
-        order: sequelize.literal('marketcap DESC'),
-    }).then((coins) => {
-        res.status(200).json(coins);
-    }).catch((error) => {
-        res.status(500).send('Internal server error');
+router.get('/favs', AuthMiddleware, function(req, res) {
+    jwt.verify(req.token, 'secretkey', (err, authData) => {
+        if(err) {
+            res.sendStatus(403);
+        } else {
+            //get favorites
+            models.user.findAll({
+                where: {
+                    id: authData.user.id
+                },
+                attributes:[],
+                include: [{ model: models.coin,
+                            attributes: ['image','price','volume','marketcap','name','fullname'],
+                            through: {attributes: []}    
+                        }],
+                order: sequelize.literal('marketcap DESC'),
+            }).then((coins) => {
+                res.status(200).json(coins);
+            }).catch((error) => {
+                res.status(500).send('Internal server error');
+            })
+        }
     })
 })
 
@@ -192,31 +190,7 @@ router.delete('/fav/:coin', AuthMiddleware, function(req, res) {
 
 })
 
-router.post('/user', function(req, res) {
-    // TODO: authentification
-    models.user.findOne({
-        where: {
-            [op.or]: {
-                login: req.body.login,
-                email: req.body.email
-            }
-        }
-    })
-    .then((user)=> {
-        if(user){
-            res.status(400).json("already created")
-        }
-        else {
-            models.user.create({
-                login: req.body.login,
-                email: req.body.email,
-                password: req.body.password
-            }).then(() => res.status(200).json("created"))
-            .catch((err) => res.status(500).json("Internal server error"))
-        }
-    })
-    .catch((err) => res.status(500).json("Internal server error"))
-})
+
 
 
 module.exports = router;

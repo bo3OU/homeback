@@ -11,19 +11,6 @@ const op = sequelize.Op;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.get('/', (req, res) => {
-    res.send("RIP ancalogon");
-});
-
-
-app.get('/user', (req, res) => {
-    models.user.findAll().then(function(coin){
-        console.log(coin)
-    })
-    res.send("aerendil is da best");
-
-});
-
 app.post('/login', (req, res) => {
     models.user.findOne({
         where:{
@@ -48,6 +35,36 @@ app.post('/login', (req, res) => {
     })
 })
 
+app.post('/register', function(req, res) {
+    // TODO: authentification
+    models.user.findOne({
+        where: {
+            [op.or]: {
+                login: req.body.login,
+                email: req.body.email
+            }
+        }
+    })
+    .then((user)=> {
+        if(user){
+            res.status(400).json("already created")
+        }
+        else {
+            models.user.create({
+                login: req.body.login,
+                email: req.body.email,
+                password: req.body.password
+            }).then(() => res.status(200).json("created"))
+            .catch((err) => res.status(500).json("Internal server error"))
+        }
+    })
+    .catch((err) => res.status(500).json("Internal server error"))
+})
+
+
+app.post('/logout', (req, res) => {
+
+})
 
 app.use('/api', routes);
 
