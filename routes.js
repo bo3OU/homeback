@@ -5,7 +5,7 @@ const request = require('request');
 const sequelize = require('sequelize');
 const op = sequelize.Op;
 const jwt = require('jsonwebtoken');
-// GET      /hist/:coin/:time/ (time : day, week, month, year, all)
+// GET      /hist/:coin/:time/ (time : hour, day, week, month, year, all)
 // GET      /coin/:coin/news
 // GET      /data/:coin/price
 // GET      /search/:string
@@ -31,24 +31,31 @@ router.get('/hist/:coin/:time/', function(req, res) {
     const coinName = req.params.coin.toString().toUpperCase();
     if(req.params.time == "day")
     {
-        request('https://min-api.cryptocompare.com/data/histominute?fsym='+ coinName +'&tsym=USD&limit=48&aggregate=30',{json: true}, (err, response, body) => {
+        request('https://min-api.cryptocompare.com/data/histominute?fsym='+ coinName +'&tsym=USD&limit=60&aggregate=1',{json: true}, (err, response, body) => {
             res.json(body.Data);
         })
-        //48 value for 1 day *30  = 1440 minute
+        //144 value for 1 day *10  = 1440 minute
+    }
+    else if(req.params.time == "day")
+    {
+        request('https://min-api.cryptocompare.com/data/histominute?fsym='+ coinName +'&tsym=USD&limit=144&aggregate=10',{json: true}, (err, response, body) => {
+            res.json(body.Data);
+        })
+        //144 value for 1 day *10  = 1440 minute
     }
     else if(req.params.time == "week")
     {
-        request('https://min-api.cryptocompare.com/data/histohour?fsym='+ coinName +'&tsym=USD&limit=84&aggregate=2',{json: true}, (err, response, body) => {
+        request('https://min-api.cryptocompare.com/data/histohour?fsym='+ coinName +'&tsym=USD&limit=168&aggregate=1',{json: true}, (err, response, body) => {
             res.json(body.Data);
         })
-        //84 value for 1 week *2  = 168 hours    
+        //168 value for 1 week *1  = 168 hours    
 }
     else if(req.params.time == "month")
     {
-        request('https://min-api.cryptocompare.com/data/histohour?fsym='+ coinName +'&tsym=USD&limit=144&aggregate=5',{json: true}, (err, response, body) => {
+        request('https://min-api.cryptocompare.com/data/histohour?fsym='+ coinName +'&tsym=USD&limit=120&aggregate=6',{json: true}, (err, response, body) => {
             res.json(body.Data);
         })
-        //144 value for 1 month *5  = 720 hours    
+        //120 value for 1 month *6  = 720 hours    
 }
     else if(req.params.time == "year")
     {
@@ -166,7 +173,6 @@ router.post('/fav/:coin', AuthMiddleware, function(req, res) {
             .catch((err) => { res.status(500).json("Internal server error") })
         }
     })
-
 })
 
 
@@ -189,8 +195,6 @@ router.delete('/fav/:coin', AuthMiddleware, function(req, res) {
     
 
 })
-
-
 
 
 module.exports = router;

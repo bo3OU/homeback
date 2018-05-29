@@ -2,6 +2,7 @@ const express = require('express')
 const models = require('./models');
 var app = express()
 var routes = require('./routes');
+var bot = require('./bot');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 
@@ -67,7 +68,7 @@ app.post('/logout', (req, res) => {
 })
 
 app.use('/api', routes);
-
+app.use('/bot', bot);
 
 
 app.listen(3000, function () {

@@ -20,7 +20,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     created_at: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
       defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
     },
     creator: {
@@ -55,35 +55,36 @@ module.exports = function(sequelize, DataTypes) {
     },
     price: {
       type: DataTypes.BIGINT,
-      allowNull: false
+      allowNull: true
     },
     volume: {
       type: DataTypes.BIGINT,
-      allowNull: false
+      allowNull: true
     },
     open: {
       type: DataTypes.BIGINT,
-      allowNull: false
+      allowNull: true
     },
     close: {
       type: DataTypes.BIGINT,
-      allowNull: false
+      allowNull: true
     },
     high: {
       type: DataTypes.BIGINT,
-      allowNull: false
+      allowNull: true
     },
     low: {
       type: DataTypes.BIGINT,
-      allowNull: false
+      allowNull: true
     },
     cc_id: {
       type: DataTypes.INTEGER(11),
-      allowNull: false
+      allowNull: true,
+      defaultValue: null
     },
     marketcap: {
       type: DataTypes.BIGINT,
-      allowNull: false
+      allowNull: true
     }
   }, {
     tableName: 'coin',
