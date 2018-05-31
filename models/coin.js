@@ -54,7 +54,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     price: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.DECIMAL(20,10),
       allowNull: true
     },
     volume: {
