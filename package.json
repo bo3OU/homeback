@@ -10,9 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^2.0.1",
     "body-parser": "^1.18.3",
-    "delay": "^3.0.0",
     "express": "^4.16.3",
     "hapi": "^17.4.0",
     "jsonwebtoken": "^8.2.1",
@@ -23,5 +21,8 @@
     "sequelize": "^4.37.7",
     "sequelize-auto": "^0.4.29",
     "sync-request": "^6.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.17.5"
   }
 }

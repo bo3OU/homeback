@@ -58,23 +58,23 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     volume: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.DECIMAL(20,2),
       allowNull: true
     },
     open: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.DECIMAL(20,10),
       allowNull: true
     },
     close: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.DECIMAL(20,10),
       allowNull: true
     },
     high: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.DECIMAL(20,10),
       allowNull: true
     },
     low: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.DECIMAL(20,10),
       allowNull: true
     },
     cc_id: {
@@ -83,7 +83,7 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: null
     },
     marketcap: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.DECIMAL(20,2),
       allowNull: true
     }
   }, {
