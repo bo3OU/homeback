@@ -10,10 +10,6 @@ var con = mysql.createConnection({
     "host": "127.0.0.1",
   });
 
-  Array.prototype.contains = function(element){
-    return this.indexOf(element) > -1;
-};
-
 models.coin.findAll({
     attributes: ["name"],
     raw: true,
