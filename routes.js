@@ -120,12 +120,12 @@ router.get('/coin/data', function(req, res) {
 })
 
 
-router.get('/coin/:coin/news', function(req, res) {
+router.get('/news', function(req, res) {
     //get the news of a coin
-    models.coin.findAll({
-        where: {name: req.params.coin},
-        attributes: [],
-        include:[{model: models.news}]
+    models.news.findAll({
+        // where: {name: req.params.coin},
+        // attributes: [],
+        // include:[{model: models.news}]
     }).then(news => res.json(news))
     .catch(error => {
         res.status(500).json("Internal server error");
