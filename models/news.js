@@ -8,14 +8,6 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true,
       autoIncrement: true
     },
-    coin_id: {
-      type: DataTypes.INTEGER(11),
-      allowNull: false,
-      references: {
-        model: 'coin',
-        key: 'id'
-      }
-    },
     url: {
       type: DataTypes.TEXT,
       allowNull: false
