@@ -14,17 +14,25 @@ var con = mysql.createConnection({
 var data = sr("GET","https://min-api.cryptocompare.com/data/v2/news/?lang=EN");
 data = JSON.parse(data.getBody('utf8')).Data;
 data.forEach(element => {
-    models.news.findOrCreate(
-    {
-        where: {
-            id: element.id
-        },
-        defaults: {
-            url: element.url,
-            title: element.title,
-            overview: element.body,
-            image: element.imageurl,
-    }})
+    // models.news.findOrCreate(
+    // {
+    //     where: {
+    //         id: element.id
+    //     },
+    //     defaults: {
+    //         url: element.url,
+    //         title: element.title,
+    //         overview: element.body,
+    //         image: element.imageurl,
+    // }})
+    models.news.Create(
+        {
+                id: element.id,
+                url: element.url,
+                title: element.title,
+                overview: element.body,
+                image: element.imageurl,
+        })
     .catch(function(err){
             console.log(err);
     })
