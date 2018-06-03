@@ -45,33 +45,62 @@ app.post('/login', (req, res) => {
 
 app.post('/register', function(req, res) {
     // TODO: authentification
-    models.user.findOne({
-        where: {
-            [op.or]: {
-                login: req.body.login,
-                email: req.body.email
-            }
-        }
-    })
-    .then((user)=> {
-        if(user){
-            res.status(400).json("already created")
+    if(req.body.password != req.body.passwordver) {
+        res.status(200).json({error: "Passwords don't match",
+                                message: 0
+                            })
+    }
+    else {
+        if(req.body.login && req.body.email && req.body.password)
+        {
+            models.user.findOne({
+                where: {
+                    [op.or]: {
+                        login: req.body.login,
+                        email: req.body.email,
+                    }
+                }
+            })
+            .then((FoundUser)=> { 
+                if(FoundUser && FoundUser.dataValues.login == req.body.login){
+                    console.log("im 1 ");
+                    res.status(200).json({error: "Login already in use",
+                        message: 0
+                    })
+                }
+                else if (FoundUser && FoundUser.dataValues.email == req.body.email) {
+                    console.log("im 2");
+                    res.status(200).json({error: "Email already in use",
+                        message: 0
+                    })
+                }
+                else {
+                    console.log("and 3");
+                    models.user.create({
+                        login: req.body.login,
+                        email: req.body.email,
+                        password: req.body.password
+                    }).then(() => res.status(201).json({error: "",
+                                                        message: 1
+                                                        }))
+                    .catch((err) => res.status(500).json({error: "An error has occured",
+                                                            message: 0
+                                                        }))
+                }
+            })
+            .catch((err) => {
+                console.log("4");
+                res.status(500).json({error: "An internal error has occured",
+                                                    message: 0
+                                                })
+            })
         }
         else {
-            models.user.create({
-                login: req.body.login,
-                email: req.body.email,
-                password: req.body.password
-            }).then(() => res.status(200).json("created"))
-            .catch((err) => res.status(500).json("Internal server error"))
-        }
-    })
-    .catch((err) => res.status(500).json("Internal server error"))
-})
-
-
-app.post('/logout', (req, res) => {
-
+        res.json({error: "Fill in the empty fields",
+                    message: 0
+                })
+    }
+    }
 })
 
 app.use('/api', routes);
