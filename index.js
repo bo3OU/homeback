@@ -20,6 +20,8 @@ app.use(function(req, res, next) {
 
 
 app.post('/login', (req, res) => {
+    if(req.body.login && req.body.password)
+    {
     models.user.findOne({
         where:{
             [op.and]: {
@@ -29,18 +31,23 @@ app.post('/login', (req, res) => {
         }
     })
     .then((user) => {
+        console.log("wtf");
         if(user) {
             jwt.sign({user: user}, 'secretkey', (err, token) => {
-                res.json({token: token});
+                res.json({"token": token,"error":""});
             })
         }
         else {
-            res.json("wrong combination");
+            res.json({"error":"Wrong combination"});
         }
     })
     .catch((err) => {
-        res.status(500).json("Internal server error");
+        res.status(500).json({"error":"Internal server error"});
     })
+}
+else {
+    res.json({"error":"Fill in the fields"});
+}
 })
 
 app.post('/register', function(req, res) {

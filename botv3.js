@@ -8,6 +8,9 @@ var con = mysql.createConnection({
     "password": "alibagho2153",
     "database": "final",
     "host": "127.0.0.1",
+    connectionLimit: 15,
+    queueLimit: 30,
+    acquireTimeout: 1000000
   });
 
 
@@ -39,16 +42,16 @@ var con = mysql.createConnection({
 // }
 
 
-const fs = require('fs');
-var file = fs.readFileSync('my_file.txt','utf8');
-var array = file.split('\n');
+// const fs = require('fs');
+// var file = fs.readFileSync('my_file.txt','utf8');
+// var array = file.split('\n');
 // if(array.indexOf("BTC") > -1)
 //   console.log('true')
 let back = sr('GET', 'https://www.cryptocompare.com/api/data/coinlist/');
 back = JSON.parse(back.getBody('utf8'));
 let i=0,j = 0;
 Object.keys(back.Data).forEach(element => {
-    if(array.indexOf(element) > -1){
+    //if(array.indexOf(element) > -1){
         models.coin.create({
             name: back.Data[element].Name,
             fullname: back.Data[element].FullName,
@@ -58,7 +61,7 @@ Object.keys(back.Data).forEach(element => {
             image: back.Data[element].ImageUrl,
              
         })
-    }
+    //}
 });
 
 

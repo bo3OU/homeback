@@ -23,10 +23,6 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true,
       defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
     },
-    creator: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
     algorithm: {
       type: DataTypes.TEXT,
       allowNull: true
@@ -40,25 +36,12 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true,
       unique: true
     },
-    website: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-      unique: true
-    },
-    wikipedia: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-    story: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
     price: {
       type: DataTypes.DECIMAL(20,10),
       allowNull: true
     },
     volume: {
-      type: DataTypes.DECIMAL(20,2),
+      type: DataTypes.DECIMAL(40,20),
       allowNull: true
     },
     open: {
@@ -83,7 +66,11 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: null
     },
     marketcap: {
-      type: DataTypes.DECIMAL(20,2),
+      type: DataTypes.DECIMAL(40,20),
+      allowNull: true
+    },
+    mc_id: {
+      type: DataTypes.INTEGER(11),
       allowNull: true
     }
   }, {

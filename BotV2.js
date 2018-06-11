@@ -1,13 +1,16 @@
 const   models = require('./models');
 const   sr = require('sync-request');
-var mysql = require('mysql');
+var mysql = require('mysql2');
 const sequelize = require('sequelize');
 const op = sequelize.Op;
 var con = mysql.createConnection({
     "user": "ali",
     "password": "alibagho2153",
     "database": "final",
-    "host": "127.0.0.1",
+    "host": "localhost",
+    connectionLimit: 15,
+    queueLimit: 30,
+    acquireTimeout: 1000000
   });
 
 models.coin.findAll({
@@ -24,17 +27,17 @@ models.coin.findAll({
         var PriceList = JSON.parse(ress.getBody('utf8'));
             for(let iter = 0; iter < Object.keys(PriceList).length; iter++) {
                 (function(){
-                    console.log(Object.keys(PriceList)[iter])
+                    console.log(PriceList[Object.keys(PriceList)[iter]].USD)
                     var sql = "UPDATE coin SET price = "+ PriceList[Object.keys(PriceList)[iter]].USD +" WHERE name like '" + Object.keys(PriceList)[iter]+ "'"; 
-                    update(sql) ;
+                    con.query(sql, (function (err, result) {
+                        console.log(sql);
+                    })());
                 })()            
             } 
     }
 })
 function update(sql) {
-    con.query(sql, (function (err, result) {
-        console.log(sql);
-    })());
+
 }
 // const fs = require('fs');
 // var file = fs.readFileSync('my_file.txt','utf8');
