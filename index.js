@@ -5,19 +5,22 @@ var routes = require('./routes');
 var bot = require('./bot');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
-
+const cors = require('cors');
 const sequelize = require('sequelize');
 const op = sequelize.Op;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-  });
-
+// app.use(function(req, res, next) {
+//     res.header("Access-Control-Allow-Origin", "*");
+//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//     next();
+//   });
+  app.use(cors({
+    origin: '*',
+    optionsSuccessStatus: 200 // legacy browser (IE11) chokes on 204 
+  }))
 
 app.post('/login', (req, res) => {
     if(req.body.login && req.body.password)

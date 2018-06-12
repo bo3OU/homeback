@@ -19,7 +19,7 @@ var con = mysql.createConnection({
 
   models.coin.findAll({
       attributes: ["name"],
-      where:{ close: {[op.eq]: null} },
+      //where:{ close: {[op.eq]: null} },
       order: [
         ['name', 'DESC']],
       raw: true, // OFFSET 2056 LIMIT 1000 AND STORE ALL COIN THAT HAS NO MKTCAP VALUE AND VOLUME VALUE TODO
@@ -30,7 +30,7 @@ var con = mysql.createConnection({
           request(url, function(error, response, body) {
             body = JSON.parse(body);
               if(body.Response == "Success" && body.Data[0] && body.Data[0].close ){
-                 var sql = "UPDATE coin SET open = "+ body.Data[0].open +
+                 var sql = "UPDATE coin SET low = "+ body.Data[0].low +
                  ", close ="+ body.Data[0].close +
                  ", high ="+ body.Data[0].high +
                  ", open ="+ body.Data[0].open +

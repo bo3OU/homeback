@@ -41,7 +41,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     volume: {
-      type: DataTypes.DECIMAL(40,20),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     open: {

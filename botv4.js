@@ -1,7 +1,7 @@
 const   models = require('./models');
 const   sr = require('sync-request');
 var limit = require("simple-rate-limiter");
-var request = limit(require("request")).to(26).per(1000);
+var request = limit(require("request")).to(20).per(1000);
 var mysql = require('mysql2');
 const sequelize = require('sequelize');
 var fs = require('fs');
@@ -54,7 +54,7 @@ var jk = 0,jkk = 0;
               })());
               }
               else {
-                stream.write("'" + element.name +  "',\n");
+                console.log("EROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOR");
               }
           })
         });
