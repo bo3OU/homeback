@@ -37,27 +37,27 @@ module.exports = function(sequelize, DataTypes) {
       unique: true
     },
     price: {
-      type: DataTypes.DECIMAL(20,10),
+      type: DataTypes.STRING(25),
       allowNull: true
     },
     volume: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING(40),
       allowNull: true
     },
     open: {
-      type: DataTypes.DECIMAL(20,10),
+      type: DataTypes.STRING(25),
       allowNull: true
     },
     close: {
-      type: DataTypes.DECIMAL(20,10),
+      type: DataTypes.STRING(25),
       allowNull: true
     },
     high: {
-      type: DataTypes.DECIMAL(20,10),
+      type: DataTypes.STRING(25),
       allowNull: true
     },
     low: {
-      type: DataTypes.DECIMAL(20,10),
+      type: DataTypes.STRING(25),
       allowNull: true
     },
     cc_id: {
@@ -66,7 +66,7 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: null
     },
     marketcap: {
-      type: DataTypes.DECIMAL(40,20),
+      type: DataTypes.DECIMAL(20,2),
       allowNull: true
     },
     mc_id: {
