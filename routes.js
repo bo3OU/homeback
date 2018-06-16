@@ -86,19 +86,17 @@ router.get('/data/:coin/price', function(req, res) {
 
  // IS NOT WORKING
 router.get('/search/:name', function(req, res) {
+    // console.log(req.url);
+    // console.log(req.params.name);
     models.coin.findAll({
         attributes:['fullname', 'name', 'image'],
         where : 
         {
-            [op.or] : {
             fullname: {
                 [op.like]: "%" + req.params.name + "%"
-            },
-            name: {
-                [op.like]: "%" + req.params.name + "%"
             }
-        }
-        }
+        },
+        limit: 10
     })
     .then(data => res.json(data))
     .catch(error => {
