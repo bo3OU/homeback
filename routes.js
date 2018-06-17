@@ -106,7 +106,7 @@ router.get('/search/:name', function(req, res) {
 
 router.get('/coin/data', function(req, res) {
     models.coin.findAll({
-        attributes: ['image','price','volume','marketcap','name','fullname'],
+        attributes: ['id','image','price','volume','marketcap','name','fullname'],
         //order: ['marketcap', 'DESC'],
         order: sequelize.literal('marketcap DESC'),
         limit: 100
@@ -142,12 +142,12 @@ router.get('/favs', AuthMiddleware, function(req, res) {
                 },
                 attributes:[],
                 include: [{ model: models.coin,
-                            attributes: ['image','price','volume','marketcap','name','fullname'],
+                            attributes: ['id'],
                             through: {attributes: []}    
                         }],
-                order: sequelize.literal('marketcap DESC'),
+               // order: sequelize.literal('marketcap DESC'),
             }).then((coins) => {
-                res.status(200).json(coins);
+                res.status(200).json(coins[0]["coins"]);
             }).catch((error) => {
                 res.status(500).send('Internal server error');
             })
@@ -162,13 +162,26 @@ router.post('/fav/:coin', AuthMiddleware, function(req, res) {
             res.sendStatus(403);
         } else {
             var result = null;
-            models.favorites.build({
-                coin_id: req.params.coin,
-                user_id: authData.user.id  
+            models.coin.findOne({
+                where : {
+                    id : req.params.coin
+                }
+            }).then(function(coin){
+                if(coin) {
+                    models.favorites.findOrCreate({
+                        where : {
+                            coin_id: req.params.coin,
+                            user_id: authData.user.id  
+                        }
+                    })
+                    .then(() => { res.json({created: true}) })
+                    .catch((err) => { res.status(500).json("Internal server error") })
+                }
+                else {
+                    res.json({"error" : "coin not found"})
+                }
             })
-            .save()
-            .then(() => { res.json({created: true}) })
-            .catch((err) => { res.status(500).json("Internal server error") })
+
         }
     })
 })
