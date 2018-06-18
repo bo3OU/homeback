@@ -44,17 +44,20 @@ var jk = 0,jkk = 0;
             jkk++;
             //console.log(element.name);
               if(body["RAW"] && body["RAW"][element.name] && body["RAW"][element.name]["USD"].MKTCAP && 
-                                              body["RAW"][element.name]["USD"].TOTALVOLUME24HTO && 
+                                              body["RAW"][element.name]["USD"].TOTALVOLUME24HTO &&  
                                               body["RAW"][element.name]["USD"].MKTCAP != 0 && 
                                               body["RAW"][element.name]["USD"].TOTALVOLUME24HTO != 0) {
                 //body.Response == "Success") {
-                var sql = "UPDATE coin SET volume = "+ body["RAW"][element.name]["USD"].TOTALVOLUME24HTO +", marketcap ="+ body["RAW"][element.name]["USD"].MKTCAP +" WHERE name = '" + element.name + "'"; 
+                var sql = "UPDATE coin SET volume = "+ 
+                body["RAW"][element.name]["USD"].TOTALVOLUME24HTO +
+                ", marketcap ="+ body["RAW"][element.name]["USD"].MKTCAP +
+                ", change24 = "+ body["RAW"][element.name]["USD"].CHANGEPCT24HOUR +
+                " WHERE name = '" + element.name + "'"; 
                 con.query(sql, (function (err, result) {
                   console.log(sql);
               })());
               }
               else {
-                console.log("EROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOR");
               }
           })
         });

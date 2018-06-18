@@ -83,17 +83,40 @@ router.get('/data/:coin/price', function(req, res) {
     })
 })
 
+router.get('/mostchanged', function(req, res) {
+    var data = [];
+    models.coin.findAll({
+        attributes: ['name', 'price', 'change24'],
+        order: sequelize.literal('change24 DESC'),
+        limit: 2,
+        raw: true
+    }).then(function(coins){
+        data = coins;
+        models.coin.findAll({
+            attributes: ['name', 'price', 'change24'],
+            order: sequelize.literal('change24 ASC'),
+            limit: 2,
+            raw: true
+        }).then(function(coinsasc){
+            data.push(coinsasc[0]);
+            data.push(coinsasc[1]);
+            res.json(data);
+        })
+    })
+})
 
  // IS NOT WORKING
 router.get('/search/:name', function(req, res) {
     // console.log(req.url);
     // console.log(req.params.name);
+    var name = req.params.name;
+    name = unescape(name);
     models.coin.findAll({
         attributes:['fullname', 'name', 'image'],
         where : 
         {
             fullname: {
-                [op.like]: "%" + req.params.name + "%"
+                [op.like]: "%" + name + "%"
             }
         },
         limit: 10
@@ -105,11 +128,14 @@ router.get('/search/:name', function(req, res) {
 })
 
 router.get('/coin/data', function(req, res) {
+    var offset = req.query.o ? req.query.o : 1;
+    console.log("l : " + offset)
     models.coin.findAll({
         attributes: ['id','image','price','volume','marketcap','name','fullname'],
-        //order: ['marketcap', 'DESC'],
-        order: sequelize.literal('marketcap DESC'),
-        limit: 100
+         order: sequelize.literal('marketcap DESC'),
+        // offset: offset,
+         limit: sequelize.literal((offset - 1 )* 100 + ",100"),
+        
     }).then((coins) => {
         res.status(200).json(coins);
     }).catch((error) => {

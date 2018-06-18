@@ -60,6 +60,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(25),
       allowNull: true
     },
+    low: {
+      type: DataTypes.DECIMAL(5,2),
+      allowNull: true
+    },
     cc_id: {
       type: DataTypes.INTEGER(11),
       allowNull: true,
