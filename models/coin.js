@@ -60,7 +60,7 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(25),
       allowNull: true
     },
-    low: {
+    change24: {
       type: DataTypes.DECIMAL(5,2),
       allowNull: true
     },

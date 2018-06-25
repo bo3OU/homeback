@@ -1,3 +1,4 @@
+var ttd = require('timestamp-to-date');
 var express = require('express');
 var router = express.Router();
 const models = require('./models');
@@ -5,6 +6,7 @@ const request = require('request');
 const sequelize = require('sequelize');
 const op = sequelize.Op;
 const jwt = require('jsonwebtoken');
+
 // GET      /hist/:coin/:time/ (time : hour, day, week, month, year, all)
 // GET      /coin/:coin/news
 // GET      /data/:coin/price
@@ -27,58 +29,74 @@ function AuthMiddleware(req, res, next) {
   }
 }
 
+function deleteAttributes(body,time){
+    body = body.Data;
+    body.forEach(function(v){ 
+        delete v.volumefrom
+        delete v.volumeto
+        delete v.low
+        delete v.high
+        delete v.open
+        var myDate = new Date( v.time *1000);
+        if(time == 'hour') {
+            v.time = (myDate.getMinutes().toString());
+        } else if(time == 'day') {
+            v.time = (myDate.getHours() +':'+ myDate.getMinutes());
+        } else if(time == 'week') {
+            v.time = (myDate.getDay() +' '+myDate.getHours()+"H");
+        } else if(time == 'month') {
+            v.time = (myDate.getDay().toString());    
+        } else if(time == 'year') {
+            v.time = (myDate.getDay() + "/" + myDate.getMonth());
+        }
+    });
+    return body;
+}
+
 router.get('/hist/:coin/:time/', function(req, res) {
     const coinName = req.params.coin.toString().toUpperCase();
-    if(req.params.time == "day")
+    if(req.params.time == "hour")
     {
         request('https://min-api.cryptocompare.com/data/histominute?fsym='+ coinName +'&tsym=USD&limit=60&aggregate=1',{json: true}, (err, response, body) => {
-            res.json(body.Data);
+            res.json(deleteAttributes(body,"hour"))
         })
         //144 value for 1 day *10  = 1440 minute
     }
     else if(req.params.time == "day")
     {
         request('https://min-api.cryptocompare.com/data/histominute?fsym='+ coinName +'&tsym=USD&limit=144&aggregate=10',{json: true}, (err, response, body) => {
-            res.json(body.Data);
+            res.json(deleteAttributes(body,'day'))
         })
         //144 value for 1 day *10  = 1440 minute
     }
     else if(req.params.time == "week")
     {
         request('https://min-api.cryptocompare.com/data/histohour?fsym='+ coinName +'&tsym=USD&limit=168&aggregate=1',{json: true}, (err, response, body) => {
-            res.json(body.Data);
+            res.json(deleteAttributes(body,'week'))
         })
         //168 value for 1 week *1  = 168 hours    
-}
+    }
     else if(req.params.time == "month")
     {
         request('https://min-api.cryptocompare.com/data/histohour?fsym='+ coinName +'&tsym=USD&limit=120&aggregate=6',{json: true}, (err, response, body) => {
-            res.json(body.Data);
+            res.json(deleteAttributes(body,'month'))
         })
         //120 value for 1 month *6  = 720 hours    
-}
+    }
     else if(req.params.time == "year")
     {
         request('https://min-api.cryptocompare.com/data/histoday?fsym='+ coinName +'&tsym=USD&limit=182&aggregate=2',{json: true}, (err, response, body) => {
-            res.json(body.Data);
+            res.json(deleteAttributes(body,'year'))
         })
         //  182 value for 1 year *2  = 365 days    
-}
-    else if(req.params.time == "all")
-    {
-        request('https://min-api.cryptocompare.com/data/histoday?fsym='+ coinName +'&tsym=USD&aggregate=10',{json: true}, (err, response, body) => {
-            res.json(body.Data);
-        })
-        //72 value for 1 day * 10  = 2000 VALUE    
-}
+    }
     else 
         res.status(404).json("not found")
 })
 
-
-
 router.get('/data/:coin/price', function(req, res) {
     request('https://min-api.cryptocompare.com/data/histominute?fsym='+ req.params.coin.toString().toUpperCase() +'&tsym=USD&limit=1',{json: true}, (err, response, body) => {
+        
         res.json(body.Data[0]);
     })
 })
@@ -86,7 +104,7 @@ router.get('/data/:coin/price', function(req, res) {
 router.get('/mostchanged', function(req, res) {
     var data = [];
     models.coin.findAll({
-        attributes: ['name', 'price', 'change24'],
+        attributes: ['name', 'price', 'change24','id'],
         order: sequelize.literal('change24 DESC'),
         limit: 2,
         raw: true
@@ -105,14 +123,11 @@ router.get('/mostchanged', function(req, res) {
     })
 })
 
- // IS NOT WORKING
 router.get('/search/:name', function(req, res) {
-    // console.log(req.url);
-    // console.log(req.params.name);
     var name = req.params.name;
     name = unescape(name);
     models.coin.findAll({
-        attributes:['fullname', 'name', 'image'],
+        attributes:['fullname', 'name', 'image','id'],
         where : 
         {
             fullname: {
@@ -127,7 +142,23 @@ router.get('/search/:name', function(req, res) {
     })
 })
 
-router.get('/coin/data', function(req, res) {
+router.get('/coin/:coin', function(req, res) {
+    models.coin.findOne({
+        attributes:['id','marketcap','volume','image','prooftype','algorithm','fullname','price','change24'],
+        where: {name: req.params.coin},
+        raw: true
+    }).then((coin) => {
+        console.log(coin);
+        if (coin)
+        res.status(200).json(coin);
+        else
+        res.sendStatus(404);
+    }).catch((error) => {
+        res.status(500).send('Internal server error');
+    })
+})
+
+router.get('/coins/data', function(req, res) {
     var offset = req.query.o ? req.query.o : 1;
     console.log("l : " + offset)
     models.coin.findAll({
@@ -142,7 +173,6 @@ router.get('/coin/data', function(req, res) {
         res.status(500).send('Internal server error');
     })
 })
-
 
 router.get('/news', function(req, res) {
     //get the news of a coin
@@ -212,7 +242,6 @@ router.post('/fav/:coin', AuthMiddleware, function(req, res) {
     })
 })
 
-
 router.delete('/fav/:coin', AuthMiddleware, function(req, res) {
     
     jwt.verify(req.token, 'secretkey', (err, authData) => {
@@ -232,6 +261,22 @@ router.delete('/fav/:coin', AuthMiddleware, function(req, res) {
     
 
 })
+
+router.get('/exists/:coin', function(req, res) {
+    models.coin.findOne({
+        attributes:['id'],
+        where: {name: req.params.coin}
+    }).then((coin) => {
+        console.log(coin);
+        if (coin)
+        res.sendStatus(200);
+        else
+        res.sendStatus(404);
+    }).catch((error) => {
+        res.status(500).send('Internal server error');
+    })
+})
+
 
 
 module.exports = router;
