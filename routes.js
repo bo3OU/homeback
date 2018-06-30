@@ -1,4 +1,3 @@
-var ttd = require('timestamp-to-date');
 var express = require('express');
 var router = express.Router();
 const models = require('./models');
@@ -31,6 +30,7 @@ function AuthMiddleware(req, res, next) {
 
 function deleteAttributes(body,time){
     body = body.Data;
+    var lastValue = "";
     body.forEach(function(v){ 
         delete v.volumefrom
         delete v.volumeto
@@ -40,14 +40,20 @@ function deleteAttributes(body,time){
         var myDate = new Date( v.time *1000);
         if(time == 'hour') {
             v.time = (myDate.getMinutes().toString());
-        } else if(time == 'day') {
-            v.time = (myDate.getHours() +':'+ myDate.getMinutes());
+            lastValue == v.time ? v.time = "" : lastValue = v.time ;     
+        } else if(time == 'day') {   
+            v.time = (myDate.getHours().toString());
+            lastValue == v.time ? v.time = "" : lastValue = v.time ;      
         } else if(time == 'week') {
-            v.time = (myDate.getDay() +' '+myDate.getHours()+"H");
+            v.time = (myDate.getDay().toString());
+            lastValue == v.time ? v.time = "" : lastValue = v.time ;      
         } else if(time == 'month') {
-            v.time = (myDate.getDay().toString());    
+            v.time = (myDate.getDate().toString());
+            lastValue == v.time ? v.time = "" : lastValue = v.time ;
         } else if(time == 'year') {
-            v.time = (myDate.getDay() + "/" + myDate.getMonth());
+            v.time = (myDate.getMonth().toString());
+            lastValue == v.time ? v.time = "" : lastValue = v.time ;
+                  
         }
     });
     return body;
@@ -57,14 +63,14 @@ router.get('/hist/:coin/:time/', function(req, res) {
     const coinName = req.params.coin.toString().toUpperCase();
     if(req.params.time == "hour")
     {
-        request('https://min-api.cryptocompare.com/data/histominute?fsym='+ coinName +'&tsym=USD&limit=60&aggregate=1',{json: true}, (err, response, body) => {
+        request('https://min-api.cryptocompare.com/data/histominute?fsym='+ coinName +'&tsym=USD&limit=30&aggregate=2',{json: true}, (err, response, body) => {
             res.json(deleteAttributes(body,"hour"))
         })
         //144 value for 1 day *10  = 1440 minute
     }
     else if(req.params.time == "day")
     {
-        request('https://min-api.cryptocompare.com/data/histominute?fsym='+ coinName +'&tsym=USD&limit=144&aggregate=10',{json: true}, (err, response, body) => {
+        request('https://min-api.cryptocompare.com/data/histominute?fsym='+ coinName +'&tsym=USD&limit=29&aggregate=49',{json: true}, (err, response, body) => {
             res.json(deleteAttributes(body,'day'))
         })
         //144 value for 1 day *10  = 1440 minute
