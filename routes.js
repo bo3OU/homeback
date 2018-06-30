@@ -166,27 +166,34 @@ router.get('/coin/:coin', function(req, res) {
 
 router.get('/coins/data', function(req, res) {
     var offset = req.query.o ? req.query.o : 1;
-    console.log("l : " + offset)
-    models.coin.findAll({
+    var limit = req.query.l ? req.query.l : 100; 
+    models.coin.findAndCountAll({
         attributes: ['id','image','price','volume','marketcap','name','fullname'],
          order: sequelize.literal('marketcap DESC'),
         // offset: offset,
-         limit: sequelize.literal((offset - 1 )* 100 + ",100"),
+         limit: sequelize.literal((offset - 1 )* limit + ","+limit),
         
     }).then((coins) => {
-        res.status(200).json(coins);
+        coins.limit = limit;
+        res.json(coins);
     }).catch((error) => {
         res.status(500).send('Internal server error');
     })
 })
 
 router.get('/news', function(req, res) {
-    //get the news of a coin
-    models.news.findAll({
+    var offset = req.query.o ? req.query.o : 1;
+    var limit = req.query.l ? req.query.l : 20; 
+    //var limit = 20;
+    models.news.findAndCountAll({
         // where: {name: req.params.coin},
         // attributes: [],
         // include:[{model: models.news}]
-    }).then(news => res.json(news))
+        limit: sequelize.literal((offset - 1 )* limit + ","+ limit),
+    }).then(news => {
+        news.limit = limit;
+        res.json(news)
+    })
     .catch(error => {
         res.status(500).json("Internal server error");
     })
@@ -286,3 +293,5 @@ router.get('/exists/:coin', function(req, res) {
 
 
 module.exports = router;
+
+
