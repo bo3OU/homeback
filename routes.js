@@ -168,7 +168,7 @@ router.get('/coins/data', function(req, res) {
     var offset = req.query.o ? req.query.o : 1;
     var limit = req.query.l ? req.query.l : 100; 
     models.coin.findAndCountAll({
-        attributes: ['id','image','price','volume','marketcap','name','fullname'],
+        attributes:['id','marketcap','volume','image','prooftype','algorithm','fullname','price','change24'],
          order: sequelize.literal('marketcap DESC'),
         // offset: offset,
          limit: sequelize.literal((offset - 1 )* limit + ","+limit),
