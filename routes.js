@@ -133,7 +133,7 @@ router.get('/search/:name', function(req, res) {
     var name = req.params.name;
     name = unescape(name);
     models.coin.findAll({
-        attributes:['fullname', 'name', 'image','id'],
+        attributes:['id','marketcap','volume','image','prooftype','algorithm','fullname','price','change24'],
         where : 
         {
             fullname: {
@@ -261,7 +261,6 @@ router.delete('/fav/:coin', AuthMiddleware, function(req, res) {
         if(err) {
             res.sendStatus(403);
         } else {
-//            res.json("hello :D");
             models.favorites.destroy({
                 where: {
                     [op.and] : { coin_id: req.params.coin, user_id: authData.user.id }
@@ -280,11 +279,10 @@ router.get('/exists/:coin', function(req, res) {
         attributes:['id'],
         where: {name: req.params.coin}
     }).then((coin) => {
-        console.log(coin);
         if (coin)
-        res.sendStatus(200);
+            res.sendStatus(200);
         else
-        res.sendStatus(404);
+            res.sendStatus(404);
     }).catch((error) => {
         res.status(500).send('Internal server error');
     })
