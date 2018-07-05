@@ -111,6 +111,11 @@ router.get('/mostchanged', function(req, res) {
     var data = [];
     models.coin.findAll({
         attributes: ['name', 'price', 'change24','id'],
+        where: {
+            marketcap: {
+                [op.gt]: 400000000
+            }
+        },
         order: sequelize.literal('change24 DESC'),
         limit: 2,
         raw: true
@@ -118,6 +123,11 @@ router.get('/mostchanged', function(req, res) {
         data = coins;
         models.coin.findAll({
             attributes: ['name', 'price', 'change24'],
+            where: {
+                marketcap: {
+                    [op.gt]: 400000000
+                }
+            },
             order: sequelize.literal('change24 ASC'),
             limit: 2,
             raw: true
@@ -133,7 +143,7 @@ router.get('/search/:name', function(req, res) {
     var name = req.params.name;
     name = unescape(name);
     models.coin.findAll({
-        attributes:['id','marketcap','volume','image','prooftype','algorithm','fullname','price','change24'],
+        attributes:['id','marketcap','volume','image','prooftype','algorithm','fullname','name','price','change24'],
         where : 
         {
             fullname: {
@@ -150,7 +160,7 @@ router.get('/search/:name', function(req, res) {
 
 router.get('/coin/:coin', function(req, res) {
     models.coin.findOne({
-        attributes:['id','marketcap','volume','image','prooftype','algorithm','fullname','price','change24'],
+        attributes:['id','marketcap','volume','image','prooftype','algorithm','fullname','price','change24','name'],
         where: {name: req.params.coin},
         raw: true
     }).then((coin) => {
@@ -168,7 +178,7 @@ router.get('/coins/data', function(req, res) {
     var offset = req.query.o ? req.query.o : 1;
     var limit = req.query.l ? req.query.l : 100; 
     models.coin.findAndCountAll({
-        attributes: ['id','marketcap','volume','image','prooftype','algorithm','fullname','price','change24'],
+        attributes: ['id','name','marketcap','volume','image','prooftype','algorithm','fullname','price','change24'],
          order: sequelize.literal('marketcap DESC'),
         // offset: offset,
          limit: sequelize.literal((offset - 1 )* limit + ","+limit),
@@ -212,6 +222,30 @@ router.get('/favs', AuthMiddleware, function(req, res) {
                 attributes:[],
                 include: [{ model: models.coin,
                             attributes: ['id'],
+                            through: {attributes: []}    
+                        }],
+               // order: sequelize.literal('marketcap DESC'),
+            }).then((coins) => {
+                res.status(200).json(coins[0]["coins"]);
+            }).catch((error) => {
+                res.status(500).send('Internal server error');
+            })
+        }
+    })
+})
+
+router.get('/fullfavs', AuthMiddleware, function(req, res) {
+    jwt.verify(req.token, 'secretkey', (err, authData) => {
+        if(err) {
+            res.sendStatus(403);
+        } else {
+            //get favorites
+            models.user.findAll({
+                where: {
+                    id: authData.user.id
+                },
+                attributes:[],
+                include: [{ model: models.coin,
                             through: {attributes: []}    
                         }],
                // order: sequelize.literal('marketcap DESC'),
